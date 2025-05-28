@@ -17,41 +17,43 @@ export default function TopSection() {
   const [loadingSuppliers, setLoadingSuppliers] = useState(true); // Add loading state for suppliers
 
   useEffect(() => {
-    fetchData();
-  }, [type]);
+    const fetchData = async () => {
+      setLoading(true); // Set loading to true when fetching products
+      setLoadingSuppliers(true); // Set loading to true when fetching suppliers
+      try {
+        const productsResponse = await fetchTopData("Products");
+        const suppliersResponse = await fetchTopData("Suppliers");
 
-  const fetchData = async () => {
-    setLoading(true); // Set loading to true when fetching products
-    setLoadingSuppliers(true); // Set loading to true when fetching suppliers
-    try {
-      const productsResponse = await fetchTopData("Products");
-      const suppliersResponse = await fetchTopData("Suppliers");
-
-      if (productsResponse.ok && suppliersResponse.ok) {
-        const productsJson = await productsResponse.json();
-        const suppliersJson = await suppliersResponse.json();
-        setProducts(productsJson.result);
-        setSuppliers(suppliersJson.result);
-      } else {
-        throw new Error("Failed to fetch data");
+        if (productsResponse.ok && suppliersResponse.ok) {
+          const productsJson = await productsResponse.json();
+          const suppliersJson = await suppliersResponse.json();
+          setProducts(productsJson.result);
+          setSuppliers(suppliersJson.result);
+        } else {
+          throw new Error("Failed to fetch data");
+        }
+      } catch (error) {
+        console.log("Error occurred:", error);
+      } finally {
+        setLoading(false); // Set loading to false when data is fetched
+        setLoadingSuppliers(false); // Set loading to false when data is fetched
       }
-    } catch (error) {
-      console.log("Error occurred:", error);
-    } finally {
-      setLoading(false); // Set loading to false when data is fetched
-      setLoadingSuppliers(false); // Set loading to false when data is fetched
-    }
-  };
+    };
+    fetchData();
+  }, [type, fetchTopData]);
 
-  const fetchTopData = async (data) => {
-    const url = `${host}/Statistics/getTop${data}/${type}`;
-    return fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  };
+  const fetchTopData = React.useCallback(
+    async (data) => {
+      const url = `${host}/Statistics/getTop${data}/${type}`;
+      return fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    },
+    [host, type]
+  );
 
   return (
     <>

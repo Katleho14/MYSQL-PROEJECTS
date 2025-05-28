@@ -13,13 +13,26 @@ export default function TopSection() {
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [type, setType] = useState("TotalBill");
-  const [loading, setLoading] = useState(true); // Add loading state for products
-  const [loadingSuppliers, setLoadingSuppliers] = useState(true); // Add loading state for suppliers
+  const [loading, setLoading] = useState(true);
+  const [loadingSuppliers, setLoadingSuppliers] = useState(true);
+
+  const fetchTopData = React.useCallback(
+    async (data) => {
+      const url = `${host}/Statistics/getTop${data}/${type}`;
+      return fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    },
+    [host, type]
+  );
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // Set loading to true when fetching products
-      setLoadingSuppliers(true); // Set loading to true when fetching suppliers
+      setLoading(true);
+      setLoadingSuppliers(true);
       try {
         const productsResponse = await fetchTopData("Products");
         const suppliersResponse = await fetchTopData("Suppliers");
@@ -35,25 +48,12 @@ export default function TopSection() {
       } catch (error) {
         console.log("Error occurred:", error);
       } finally {
-        setLoading(false); // Set loading to false when data is fetched
-        setLoadingSuppliers(false); // Set loading to false when data is fetched
+        setLoading(false);
+        setLoadingSuppliers(false);
       }
     };
     fetchData();
   }, [type, fetchTopData]);
-
-  const fetchTopData = React.useCallback(
-    async (data) => {
-      const url = `${host}/Statistics/getTop${data}/${type}`;
-      return fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    },
-    [host, type]
-  );
 
   return (
     <>
@@ -82,7 +82,7 @@ export default function TopSection() {
           </ToggleButton>
         </Tooltip>
       </ToggleButtonGroup>
-      {loading || loadingSuppliers ? ( // Render loading message if data is being fetched
+      {loading || loadingSuppliers ? (
         <p className="text-2xl">Loading...</p>
       ) : (
         <div className="flex justify-between">
